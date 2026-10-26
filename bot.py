@@ -138,9 +138,11 @@ def main():
     app = web.Application()
 
     async def health_check(request):
-    return web.Response(text="OK")
+        return web.Response(text="OK")
 
-app.router.add_get('/', health_check)
+    app.router.add_get('/', health_check)
+    
+    # ... остальной код ...
     
     # Обработчик вебхука
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
