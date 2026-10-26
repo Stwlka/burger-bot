@@ -136,6 +136,11 @@ async def on_shutdown(bot: Bot):
 
 def main():
     app = web.Application()
+
+    async def health_check(request):
+    return web.Response(text="OK")
+
+app.router.add_get('/', health_check)
     
     # Обработчик вебхука
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
