@@ -1,40 +1,27 @@
 import asyncio
 import logging
 import os
-from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 logging.basicConfig(level=logging.INFO)
 
-# ==========================================
-# ВСТАВЬ СЮДА СВОЙ НОВЫЙ ТОКЕН (ПОСЛЕ REVOKE)
+# ВСТАВЬ СВОЙ ТОКЕН И ID
 BOT_TOKEN = '8993291116:AAFIIIhfkOCR7u8Tsqxe6lFufT8vEWHZOLM'
-# ВСТАВЬ СЮДА СВОЙ ID (узнать у @userinfobot)
 ADMIN_ID = 6994399653
-# ==========================================
 
 # ВСТАВЬ АДРЕС СВОЕГО CLOUDFLARE WORKER'А
 WORKER_URL = "https://wild-credit-6d87.kzvania4.workers.dev"
-# ==========================================
-
-# Секретный путь для вебхука (придумай любой набор букв)
-WEBHOOK_PATH = "/webhook"
-# Твой будущий адрес на Render (мы узнаем его после деплоя)
-BASE_WEBHOOK_URL = "https://burger-bot-9t1p.onrender.com"
 
 session = AiohttpSession(api=TelegramAPIServer.from_base(WORKER_URL))
 bot = Bot(token=BOT_TOKEN, session=session)
 dp = Dispatcher()
 
-# Имитация базы данных
 cart_db = {}
 
-# Меню бургеров
 BURGERS = {
     "gladiator": {"name": "Гладиатор", "price": 450},
     "cheeseburger": {"name": "Чизбургер", "price": 370},
@@ -123,41 +110,9 @@ async def process_checkout(callback: types.CallbackQuery):
         await callback.message.edit_text("Ошибка при отправке заказа. Попробуйте позже.")
         print(f"Ошибка отправки админу: {e}")
 
-# ==========================================
-# НАСТРОЙКА ВЕБ-СЕРВЕРА ДЛЯ RENDER
-# ==========================================
-async def on_startup(bot: Bot):
-    webhook_url = f"{BASE_WEBHOOK_URL}{WEBHOOK_PATH}"
-    await bot.set_webhook(webhook_url)
-    print(f"Вебхук установлен: {webhook_url}")
-
-async def on_shutdown(bot: Bot):
-    await bot.delete_webhook()
-
-def main():
-    app = web.Application()
-
-    async def health_check(request):
-        return web.Response(text="OK")
-
-    app.router.add_get('/', health_check)
-    
-    # ... остальной код ...
-    
-    # Обработчик вебхука
-    webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
-    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
-    
-    # Добавляем обработчики старта/остановки
-    dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
-    
-    # Настраиваем приложение
-    setup_application(app, dp, bot=bot)
-    
-    # Render сам выдает порт через переменную окружения PORT
-    port = int(os.environ.get("PORT", 8080))
-    web.run_app(app, host="0.0.0.0", port=port)
+async def main():
+    print("Бот запущен...")
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
