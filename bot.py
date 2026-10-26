@@ -25,7 +25,7 @@ WORKER_URL = "https://wild-credit-6d87.kzvania4.workers.dev"
 # Секретный путь для вебхука (придумай любой набор букв)
 WEBHOOK_PATH = "/webhook"
 # Твой будущий адрес на Render (мы узнаем его после деплоя)
-BASE_WEBHOOK_URL = os.getenv("RENDER_EXTERNAL_URL", "https://твой-бот.onrender.com")
+BASE_WEBHOOK_URL = "https://burger-bot-9t1p.onrender.com"
 
 session = AiohttpSession(api=TelegramAPIServer.from_base(WORKER_URL))
 bot = Bot(token=BOT_TOKEN, session=session)
